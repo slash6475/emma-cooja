@@ -159,7 +159,7 @@ diff -crB ./cooja-avrora-patch-wip-davidkopf/tools/cooja/apps/serial_socket/java
 +       
 +       Box serialPortBox = Box.createHorizontalBox();
 +       serialPortBox.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
-+       serialPortChoice = new JComboBox<String>(sPorts); serialPortBox.add(serialPortChoice);
++       serialPortChoice = new JComboBox(sPorts); serialPortBox.add(serialPortChoice);
 +       startButton = new JButton("Start"); serialPortBox.add(startButton);
 +       
 +       startButton.addActionListener(new ActionListener(){
