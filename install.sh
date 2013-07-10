@@ -4,6 +4,7 @@ THIS=$( cd "$( dirname "$0" )" && pwd )
 
 usage()
 {
+        echo "emma-cooja install"
 	echo "install.sh DESTINATION"
 	echo "		DESTINATION: The location of a Contiki directory (David Kopf branch)"
 }
@@ -18,10 +19,13 @@ fi
 echo "Installing 'emma-cooja' ..."
 
 # Patch Contiki OS
-patch -p2 --directory=$DEST --input=$THIS/patch/cooja_avrora-serial-socket_patch.diff
+#patch -p2 --directory=$DEST --input=$THIS/patch/cooja_avrora-serial-socket_patch.diff
+
+# Copy COOJA File
+cp -R $THIS/src/* $DEST/
 
 # Copy Simulation file
-mkdir $DEST/../Simulations
-cp $THIS/src/emma-node-example.csc $DEST/../Simulations
+mkdir $DEST/../simulations
+cp $THIS/simulations/* $DEST/../simulations/
 
 echo "Done."
