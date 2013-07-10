@@ -43,6 +43,8 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.ArrayList;
 import java.lang.Runtime;
+import java.lang.*;
+import java.io.*;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -167,17 +169,20 @@ public class SerialSocketServer extends VisPlugin implements MotePlugin {
         statusLabel.setText("Listening on port: " + LISTEN_PORT);
       }
       server = new ServerSocket(LISTEN_PORT);
-      /*Tunslip starting */
-        try {
-           Runtime.getRuntime().exec("gksudo ./tools/tunslip6 -a 127.0.0.1 aaaa::1/64"); 
-           logger.info("Tunslip starting DONE");
-           }
-        catch(IOException e){
-           logger.info("Tunslip starting FAILED" + e.getMessage());
-           }
+
+
 
       new Thread() {
         public void run() {
+           /*Tunslip starting */
+           try{
+              Runtime.getRuntime().exec("gksudo -- ./tools/tunslip6 -a 127.0.0.1 aaaa::1/64"); 
+              logger.info("Tunslip starting OK : ");
+              }
+           catch(Exception e){
+              logger.info("Tunslip starting FAILED : " + e.getMessage());
+              }
+
           while (server != null) {
             try {
               client = server.accept();
@@ -199,6 +204,7 @@ public class SerialSocketServer extends VisPlugin implements MotePlugin {
         }
 
       }.start();
+
     } catch (Exception e) {
       throw (RuntimeException) new RuntimeException(
           "Connection error: " + e.getMessage()).initCause(e);

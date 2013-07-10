@@ -73,6 +73,8 @@ The COOJA Simulator
     <mkdir dir="${build}"/>
     <mkdir dir="${build}/tools"/>
     <copy file="${tools}/tunslip6" todir="${build}/tools/" />
+    <chmod file="${build}/tools/tunslip6" perm="755"/>
+
     <javac srcdir="${java}" destdir="${build}" debug="on"
            includeantruntime="false">
       <classpath>
