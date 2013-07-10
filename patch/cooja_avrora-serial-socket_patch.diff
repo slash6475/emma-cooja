@@ -1,0 +1,245 @@
+diff -crB ./cooja-avrora-patch-wip-davidkopf/tools/cooja/apps/avrora/src/se/sics/cooja/avrmote/interfaces/AvroraUsart0.java ./workspace/contiki/tools/cooja/apps/avrora/src/se/sics/cooja/avrmote/interfaces/AvroraUsart0.java
+*** ./cooja-avrora-patch-wip-davidkopf/tools/cooja/apps/avrora/src/se/sics/cooja/avrmote/interfaces/AvroraUsart0.java	2012-06-20 07:11:38.000000000 +0200
+--- ./workspace/contiki/tools/cooja/apps/avrora/src/se/sics/cooja/avrmote/interfaces/AvroraUsart0.java	2013-04-29 15:14:42.830423581 +0200
+***************
+*** 30,36 ****
+--- 30,38 ----
+  package se.sics.cooja.avrmote.interfaces;
+  
+  import se.sics.cooja.Mote;
++ import se.sics.cooja.ClassDescription;
+  
++ @ClassDescription("Usart 0")
+  public class AvroraUsart0 extends AvroraUsart1 {
+    public AvroraUsart0(Mote mote) {
+      super(mote);
+diff -crB ./cooja-avrora-patch-wip-davidkopf/tools/cooja/apps/avrora/src/se/sics/cooja/avrmote/interfaces/AvroraUsart1.java ./workspace/contiki/tools/cooja/apps/avrora/src/se/sics/cooja/avrmote/interfaces/AvroraUsart1.java
+*** ./cooja-avrora-patch-wip-davidkopf/tools/cooja/apps/avrora/src/se/sics/cooja/avrmote/interfaces/AvroraUsart1.java	2012-06-20 07:11:38.000000000 +0200
+--- ./workspace/contiki/tools/cooja/apps/avrora/src/se/sics/cooja/avrmote/interfaces/AvroraUsart1.java	2013-04-29 15:14:52.366423772 +0200
+***************
+*** 39,46 ****
+--- 39,50 ----
+  import se.sics.cooja.avrmote.AvroraMote;
+  import se.sics.cooja.dialogs.SerialUI;
+  import avrora.sim.mcu.AtmelMicrocontroller;
++ import se.sics.cooja.ClassDescription;
+  
++ @ClassDescription("Usart 1")
+  public class AvroraUsart1 extends SerialUI {
++ 	private static final long DELAY_INCOMING_DATA = 69; /* 115200 bit/s */
++ 
+    private static Logger logger = Logger.getLogger(AvroraUsart1.class);
+  
+    private AvroraMote myMote;
+***************
+*** 55,61 ****
+        public void execute(long t) {
+          if (usart.receiving) {
+            /* XXX TODO Postpone how long? */
+!           myMote.getSimulation().scheduleEvent(this, t+Simulation.MILLISECOND);
+            return;
+          }
+          usart.startReceive();
+--- 59,65 ----
+        public void execute(long t) {
+          if (usart.receiving) {
+            /* XXX TODO Postpone how long? */
+!           myMote.getSimulation().scheduleEvent(this, t+DELAY_INCOMING_DATA);
+            return;
+          }
+          usart.startReceive();
+diff -crB ./cooja-avrora-patch-wip-davidkopf/tools/cooja/apps/avrora/src/se/sics/cooja/avrmote/RavenMoteType.java ./workspace/contiki/tools/cooja/apps/avrora/src/se/sics/cooja/avrmote/RavenMoteType.java
+*** ./cooja-avrora-patch-wip-davidkopf/tools/cooja/apps/avrora/src/se/sics/cooja/avrmote/RavenMoteType.java	2012-06-20 07:11:38.000000000 +0200
+--- ./workspace/contiki/tools/cooja/apps/avrora/src/se/sics/cooja/avrmote/RavenMoteType.java	2013-04-29 15:09:45.694417590 +0200
+***************
+*** 40,45 ****
+--- 40,46 ----
+  import se.sics.cooja.avrmote.interfaces.AvroraClock;
+  import se.sics.cooja.avrmote.interfaces.AvroraLED;
+  import se.sics.cooja.avrmote.interfaces.AvroraMoteID;
++ import se.sics.cooja.avrmote.interfaces.AvroraUsart0;
+  import se.sics.cooja.avrmote.interfaces.AvroraUsart1;
+  import se.sics.cooja.avrmote.interfaces.RavenRadio;
+  import se.sics.cooja.interfaces.IPAddress;
+***************
+*** 84,89 ****
+--- 85,91 ----
+          AvroraLED.class,
+          RavenRadio.class,
+          AvroraClock.class,
++         AvroraUsart0.class,
+          AvroraUsart1.class,
+          AvrDebugger.class,
+          AvroraADC.class,
+diff -crB ./cooja-avrora-patch-wip-davidkopf/tools/cooja/apps/serial_socket/java/SerialSocketServer.java ./workspace/contiki/tools/cooja/apps/serial_socket/java/SerialSocketServer.java
+*** ./cooja-avrora-patch-wip-davidkopf/tools/cooja/apps/serial_socket/java/SerialSocketServer.java	2012-06-20 07:11:38.000000000 +0200
+--- ./workspace/contiki/tools/cooja/apps/serial_socket/java/SerialSocketServer.java	2013-04-29 15:09:45.694417590 +0200
+***************
+*** 31,36 ****
+--- 31,38 ----
+  
+  import java.awt.BorderLayout;
+  import java.awt.Dimension;
++ import java.awt.event.ActionListener;
++ import java.awt.event.ActionEvent;
+  import java.io.DataInputStream;
+  import java.io.DataOutputStream;
+  import java.io.IOException;
+***************
+*** 39,50 ****
+--- 41,55 ----
+  import java.util.Collection;
+  import java.util.Observable;
+  import java.util.Observer;
++ import java.util.ArrayList;
+  
+  import javax.swing.BorderFactory;
+  import javax.swing.Box;
+  import javax.swing.JComponent;
+  import javax.swing.JLabel;
+  import javax.swing.JPanel;
++ import javax.swing.JButton;
++ import javax.swing.JComboBox;
+  import javax.swing.SwingUtilities;
+  
+  import org.apache.log4j.Logger;
+***************
+*** 58,63 ****
+--- 63,69 ----
+  import se.sics.cooja.Simulation;
+  import se.sics.cooja.VisPlugin;
+  import se.sics.cooja.interfaces.SerialPort;
++ import se.sics.cooja.interfaces.Log;
+  
+  /**
+   * Socket to simulated serial port forwarder. Server version.
+***************
+*** 79,84 ****
+--- 85,92 ----
+    private Observer serialDataObserver;
+  
+    private JLabel statusLabel, inLabel, outLabel;
++   private JButton startButton;
++   private JComboBox serialPortChoice;
+    private int inBytes = 0, outBytes = 0;
+  
+    private ServerSocket server;
+***************
+*** 93,98 ****
+--- 101,123 ----
+      this.mote = mote;
+  
+      LISTEN_PORT = 60000 + mote.getID();
++     
++     /* Mote serial port */
++     ArrayList<Log> availablePorts = this.mote.getInterfaces().getInterfaceOfTypeList(Log.class);
++     int nbAvailablePorts = availablePorts.size();
++     int cnt = 0;
++     String[] sPorts = new String[nbAvailablePorts];
++     if (availablePorts.size() <= 0) {
++       throw new RuntimeException("No mote serial port");
++     }
++     else
++     {
++     	// Create window listing of available ports
++     	for(cnt = 0 ; cnt<nbAvailablePorts ; cnt ++)
++     	{
++     		sPorts[cnt] = availablePorts.get(cnt).getClass().getSimpleName();
++     	}
++     }
+  
+      /* GUI components */
+      if (GUI.isVisualized()) {
+***************
+*** 104,112 ****
+--- 129,154 ----
+        mainBox.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
+        inLabel = configureLabel(mainBox, "socket -> mote:", "0 bytes");
+        outLabel = configureLabel(mainBox, "mote -> socket", "0 bytes");
++       
++       Box serialPortBox = Box.createHorizontalBox();
++       serialPortBox.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
++       serialPortChoice = new JComboBox<String>(sPorts); serialPortBox.add(serialPortChoice);
++       startButton = new JButton("Start"); serialPortBox.add(startButton);
++       
++       startButton.addActionListener(new ActionListener(){
++ 				public void actionPerformed(ActionEvent e){
++ 					// Start button action
++ 					((JButton)e.getSource()).setEnabled(false);
++ 					serialPortChoice.setEnabled(false);
++ 					setSerialPort();
++ 					logger.info("Chosen serial port: " + (String)serialPortChoice.getSelectedItem());
++ 					startSerialSocket();
++ 				}
++ 			});
+  
+        getContentPane().add(BorderLayout.NORTH, northBox);
+        getContentPane().add(BorderLayout.CENTER, mainBox);
++       getContentPane().add(BorderLayout.SOUTH, serialPortBox);
+        pack();
+      }
+  
+***************
+*** 115,121 ****
+--- 157,165 ----
+      if (serialPort == null) {
+        throw new RuntimeException("No mote serial port");
+      }
++   } // End of constructor
+  
++ 	private void startSerialSocket(){
+      try {
+        logger.info("Listening on port: " + LISTEN_PORT);
+        if (GUI.isVisualized()) {
+***************
+*** 267,272 ****
+    public Mote getMote() {
+      return mote;
+    }
+! 
+  }
+  
+--- 311,322 ----
+    public Mote getMote() {
+      return mote;
+    }
+!   
+!   private void setSerialPort() {
+!   	serialPort = (SerialPort) this.mote.getInterfaces().get((String)serialPortChoice.getSelectedItem());
+!   	if (serialPort == null) {
+!   		throw new RuntimeException("Unknown serial port, try to re-create simulation.");
+!   	}
+!   }
+  }
+  
+diff -crB ./cooja-avrora-patch-wip-davidkopf/tools/cooja/java/se/sics/cooja/MoteInterfaceHandler.java ./workspace/contiki/tools/cooja/java/se/sics/cooja/MoteInterfaceHandler.java
+*** ./cooja-avrora-patch-wip-davidkopf/tools/cooja/java/se/sics/cooja/MoteInterfaceHandler.java	2012-06-20 07:11:38.000000000 +0200
+--- ./workspace/contiki/tools/cooja/java/se/sics/cooja/MoteInterfaceHandler.java	2013-04-29 15:09:46.338417604 +0200
+***************
+*** 112,117 ****
+--- 112,136 ----
+  
+      return null;
+    }
++   
++   /**
++    * Returns interface list of given type.
++    *
++    * Usage: getInterfaceOfTypeList(Radio.class)
++    *
++    * @param interfaceType Class of interface to return
++    * @return Mote interface array, or empty array if no interface exists of given type
++    */
++   public <N extends MoteInterface> ArrayList<N> getInterfaceOfTypeList(Class<N> interfaceType) {
++     ArrayList<N> list = new ArrayList<N>();
++     for (MoteInterface intf : moteInterfaces) {
++       if (interfaceType.isInstance(intf)) {
++         list.add(interfaceType.cast(intf));
++       }
++     }
++ 
++     return list;
++   }
+  
+    /**
+     * Returns the first interface with a class name that ends with the given arguments.
