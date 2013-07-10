@@ -24,9 +24,9 @@
       se.sics.cooja.avrmote.RavenMoteType
       <identifier>Raven1</identifier>
       <description>border-router</description>
-      <source EXPORT="discard">/tmp/emma-tmp/emma-node/examples/ipv6/rpl-border-router/border-router.c</source>
+      <source EXPORT="discard">../../../../emma-node/examples/ipv6/rpl-border-router/border-router.c</source>
       <commands EXPORT="discard">make border-router.avr-raven TARGET=avr-raven</commands>
-      <firmware EXPORT="copy">/tmp/emma-tmp/emma-node/examples/ipv6/rpl-border-router/border-router.avr-raven</firmware>
+      <firmware EXPORT="copy">../../../../emma-node/examples/ipv6/rpl-border-router/border-router.avr-raven</firmware>
       <moteinterface>se.sics.cooja.interfaces.Position</moteinterface>
       <moteinterface>se.sics.cooja.avrmote.interfaces.AvroraMoteID</moteinterface>
       <moteinterface>se.sics.cooja.avrmote.interfaces.AvroraLED</moteinterface>
@@ -45,9 +45,9 @@
       se.sics.cooja.avrmote.RavenMoteType
       <identifier>Raven2</identifier>
       <description>emma-node</description>
-      <source EXPORT="discard">/tmp/emma-tmp/emma-node/examples/emma-node-example/emma-node-example.c</source>
+      <source EXPORT="discard">../../../../emma-node/examples/emma-node-example/emma-node-example.c</source>
       <commands EXPORT="discard">make emma-node-example.avr-raven TARGET=avr-raven</commands>
-      <firmware EXPORT="copy">/tmp/emma-tmp/emma-node/examples/emma-node-example/emma-node-example.avr-raven</firmware>
+      <firmware EXPORT="copy">../../../../emma-node/examples/emma-node-example/emma-node-example.avr-raven</firmware>
       <moteinterface>se.sics.cooja.interfaces.Position</moteinterface>
       <moteinterface>se.sics.cooja.avrmote.interfaces.AvroraMoteID</moteinterface>
       <moteinterface>se.sics.cooja.avrmote.interfaces.AvroraLED</moteinterface>

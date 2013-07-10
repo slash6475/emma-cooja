@@ -72,7 +72,7 @@ The COOJA Simulator
   <target name="compile" depends="init">
     <mkdir dir="${build}"/>
     <mkdir dir="${build}/tools"/>
-    <copy file="${tools}/tunslip6" todir="${build}/tools/tunslip6" />
+    <copy file="${tools}/tunslip6" todir="${build}/tools/" />
     <javac srcdir="${java}" destdir="${build}" debug="on"
            includeantruntime="false">
       <classpath>
