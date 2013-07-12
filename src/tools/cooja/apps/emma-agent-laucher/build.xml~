@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+
+<project name="COOJA: emma-agent-laucher" default="jar" basedir=".">
+  <property name="cooja" location="../.."/>
+  <property name="cooja_jar" value="../../dist/cooja.jar"/>
+  <property name="dist" value="dist/"/>
+  <property name="lib" value="lib/"/>
+  <property name="dep" value="dep/"/>
+
+  <path id="lib-classpath">
+     <fileset dir="${dep}" includes="*.jar"/>
+  </path>
+  <manifestclasspath property="jar.classpath" jarfile="${dist}/emma-agent-laucher.jar">
+      <classpath refid="lib-classpath" />
+  </manifestclasspath>
+
+  <target name="init">
+    <tstamp/>
+  </target>
+
+  <target name="compile" depends="init">
+    <mkdir dir="build"/>
+    <javac srcdir="java" destdir="build" debug="on" includeantruntime="false" classpathref="lib-classpath">
+      <classpath>
+        <pathelement path="."/>
+        <pathelement location="${cooja_jar}"/>
+      </classpath>
+    </javac>
+  </target>
+
+  <target name="clean" depends="init">
+	<delete dir="build"/>
+  </target>
+
+  <target name="jar" depends="clean, init, compile">
+    <mkdir dir="${dist}"/>
+    <jar destfile="${dist}/emma-agent-laucher.jar" basedir="build">
+      <zipgroupfileset dir="${dep}" includes="**/*.jar" />
+      <manifest>
+	<attribute name="Class-Path" value="${jar.classpath}"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="jar_and_cooja_run" depends="jar">
+	<ant antfile="build.xml" dir="${cooja}" target="run" inheritAll="false"/>
+  </target>
+
+</project>

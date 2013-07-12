@@ -145,7 +145,7 @@ public class IPAddress extends MoteInterface {
       }
       byte[] addressData = new byte[16];
       System.arraycopy(
-          structData, offset+2/* ipaddr offset */,
+          structData, offset+1/* ipaddr offset */,
           addressData, 0, 16);
 
       if (addressData[0] == (byte)0xFE && addressData[1] == (byte)0x80) {
@@ -167,9 +167,9 @@ public class IPAddress extends MoteInterface {
 
     StringBuilder sb = new StringBuilder();
     for (int i=0; i < 14; i+=2) {
-      sb.append(String.format("%02x%02x:", 0xFF&ip[i+0], 0xFF&ip[i+1]));
+      sb.append(String.format("%02x%02x:", ip[i+0], ip[i+1]));
     }
-    sb.append(String.format("%02x%02x", 0xFF&ip[14], 0xFF&ip[15]));
+    sb.append(String.format("%02x%02x", ip[14], ip[15]));
     return sb.toString();
   }
 
