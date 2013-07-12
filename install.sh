@@ -27,5 +27,5 @@ cp -R $THIS/src/* $DEST/
 # Copy Simulation file
 mkdir $DEST/../simulations
 cp $THIS/simulations/* $DEST/../simulations/
-
+cp $THIS/start.sh $DEST
 echo "Done."
