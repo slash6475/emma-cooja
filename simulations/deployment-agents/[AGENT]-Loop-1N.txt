@@ -1,0 +1,1 @@
+{"NAME":"Loop","PRE":"L#cnt<10","POST":["L#cnt+1"],"TARGET":["[aaaa::200:2:2:202]:5683/L/cnt"]}
