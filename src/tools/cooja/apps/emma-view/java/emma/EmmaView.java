@@ -199,7 +199,6 @@ public class EmmaView implements VisualizerSkin {
                   buff2_b     =  moteMem.getMemorySegment(moteMem.parseInt(buff_b)+ 2 + EMMA_RESOURCE_NAME_SIZE, 2);
                   buff2_b     =  moteMem.getMemorySegment(moteMem.parseInt(buff2_b), 2);
 
-                  System.out.println("plop : " + moteMem.parseInt(buff2_b));
                   r.setValue(moteMem.parseInt(buff2_b));
                 }
 
@@ -233,10 +232,13 @@ public class EmmaView implements VisualizerSkin {
             Point pixel = visualizer.transformPositionToPixel(pos);
             int msgWidth = fm.stringWidth(msg);
 
+            int count = 0;
             for (int i = 0; i < rmote.getResources().size(); i++){
               ArrayList<Resource> childs = rmote.getResources().get(i).getResources();
-              for(int j=0; j < childs.size(); j ++)
-                g.drawString("/" + rmote.getResources().get(i).getName() + "/" + childs.get(j).getName() + " : " + childs.get(j).getValue(), pixel.x + 15, pixel.y + 5 - j*10);
+              for(int j=0; j < childs.size(); j ++){
+                g.drawString("/" + rmote.getResources().get(i).getName() + "/" + childs.get(j).getName() + " : " + childs.get(j).getValue(), pixel.x + 15, pixel.y + 5 - count);
+                count += 10;
+              }
             }
 
           }
