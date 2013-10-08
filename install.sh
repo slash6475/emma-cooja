@@ -20,17 +20,25 @@ echo "Installing 'emma-cooja' ..."
 
 # Patch Contiki OS
 #patch -p2 --directory=$DEST --input=$THIS/patch/cooja_avrora-serial-socket_patch.diff
-
+ 
 # Copy COOJA File
+echo -ne "Copying COOJA files"
+echo -e  "==================="
 cp -R $THIS/src/* $DEST/
+cp $THIS/start.sh $DEST
 
-echo "EMMA Plugin compilation"
-cd $DEST/tools/cooja/apps/emma-view/
-ant
+# Compiling tunslip
+echo -ne "Tunslip6 compilation"
+echo -e  "===================="
+cd $DEST/tools/
+gcc tunslip6.c -o tunslip6
 cd $THIS
 
 # Copy Simulation file
+echo -ne "Copying simulation files"
+echo -e  "========================"
 mkdir $DEST/../simulations
 cp -r $THIS/simulations/* $DEST/../simulations/
-cp $THIS/start.sh $DEST
+
+
 echo "Done."
