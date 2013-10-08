@@ -23,6 +23,7 @@
   <target name="clean">
     <delete dir="${build}"/>
     <delete dir="${lib}"/>
+    <ant antfile="build.xml" dir="${coffee}" target="clean" inheritAll="false"/>
   </target>
 
   <target name="mspsim" depends="init">

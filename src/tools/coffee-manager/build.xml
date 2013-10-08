@@ -11,8 +11,10 @@
   </target>
 
   <target name="clean" depends="init">
+    <delete file="build/se/sics/coffee/*"/>
+    <delete file="build/*"/>
+    <delete dir="build"  includeEmptyDirs="true"/>
     <delete file="coffee.jar"/>
-    <delete dir="build"/>
   </target>
 
   <target name="configs" depends="init">
