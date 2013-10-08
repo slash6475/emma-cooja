@@ -24,6 +24,11 @@ echo "Installing 'emma-cooja' ..."
 # Copy COOJA File
 cp -R $THIS/src/* $DEST/
 
+echo "EMMA Plugin compilation"
+cd $DEST/tools/cooja/apps/emma-view/
+ant
+cd $THIS
+
 # Copy Simulation file
 mkdir $DEST/../simulations
 cp -r $THIS/simulations/* $DEST/../simulations/
