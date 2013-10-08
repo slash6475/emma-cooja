@@ -19,6 +19,10 @@
 
   <target name="clean" depends="init">
     <delete dir="build" file="${archive}"/>
+    <delete dir="build"/>
+    <delete dir="dist"/>
+    <ant antfile="build.xml" dir="../../../../tools/collect-view" target="clean"
+         inheritAll="false"/>
   </target>
 
   <target name="jar" depends="compile">

@@ -19,7 +19,8 @@
   </target>
 
   <target name="clean" depends="init">
-	<delete dir="build"/>
+  <delete dir="build"/>
+  <delete dir="lib"/>
   </target>
 
   <target name="jar" depends="clean, init, compile">
