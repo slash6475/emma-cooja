@@ -68,6 +68,7 @@ import se.sics.cooja.VisPlugin;
 import se.sics.cooja.interfaces.SerialPort;
 import se.sics.cooja.interfaces.Log;
 
+import java.io.*;
 /**
  * Socket to simulated serial port forwarder. Server version.
  * 
@@ -139,15 +140,15 @@ public class SerialSocketServer extends VisPlugin implements MotePlugin {
       startButton = new JButton("Start"); serialPortBox.add(startButton);
       
       startButton.addActionListener(new ActionListener(){
-				public void actionPerformed(ActionEvent e){
+        public void actionPerformed(ActionEvent e){
 					// Start button action
-					((JButton)e.getSource()).setEnabled(false);
-					serialPortChoice.setEnabled(false);
-					setSerialPort();
-					logger.info("Chosen serial port: " + (String)serialPortChoice.getSelectedItem());
-					startSerialSocket();
-				}
-			});
+         ((JButton)e.getSource()).setEnabled(false);
+         serialPortChoice.setEnabled(false);
+         setSerialPort();
+         logger.info("Chosen serial port: " + (String)serialPortChoice.getSelectedItem());
+         startSerialSocket();
+       }
+     });
 
       getContentPane().add(BorderLayout.NORTH, northBox);
       getContentPane().add(BorderLayout.CENTER, mainBox);
@@ -162,7 +163,7 @@ public class SerialSocketServer extends VisPlugin implements MotePlugin {
     }
   } // End of constructor
 
-	private void startSerialSocket(){
+  private void startSerialSocket(){
     try {
       logger.info("Listening on port: " + LISTEN_PORT);
       if (GUI.isVisualized()) {
@@ -174,166 +175,192 @@ public class SerialSocketServer extends VisPlugin implements MotePlugin {
 
       new Thread() {
         public void run() {
-           /*Tunslip starting */
-           try{
-              Runtime.getRuntime().exec("gksudo -- ./tools/tunslip6 -a 127.0.0.1 aaaa::1/64"); 
-              logger.info("Tunslip starting OK : ");
-              }
-           catch(Exception e){
-              logger.info("Tunslip starting FAILED : " + e.getMessage());
+         /*Tunslip starting */
+         try{
+          final Process proc = Runtime.getRuntime().exec("gksudo -- ./tools/tunslip6 -a 127.0.0.1 aaaa::1/64"); 
+          logger.info("Tunslip starting OK : ");
+          new Thread() {
+           public void run() {
+            try{
+              BufferedReader stdInput = new BufferedReader(new 
+               InputStreamReader(proc.getInputStream()));
+
+              BufferedReader stdError = new BufferedReader(new 
+               InputStreamReader(proc.getErrorStream()));
+              String s = new String();
+        // read the output from the command
+              while ((s = stdInput.readLine()) != null) {
+                System.out.println(s);
               }
 
-          while (server != null) {
-            try {
-              client = server.accept();
-              in = new DataInputStream(client.getInputStream());
-              out = new DataOutputStream(client.getOutputStream());
-              out.flush();
-
-              startSocketReadThread(in);
-              if (GUI.isVisualized()) {
-                statusLabel.setText("Client connected: " + client.getInetAddress());
+        // read any errors from the attempted command
+              while ((s = stdError.readLine()) != null) {
+                System.out.println(s);
               }
-            } catch (IOException e) {
-              logger.fatal("Listening thread shut down: " + e.getMessage());
-              server = null;
-              cleanupClient();
-              break;
+            }
+
+            catch(Exception e){
+              System.out.println("Exception " + e.getMessage());
+
             }
           }
-        }
+        }.start();
+      }
+      catch(Exception e){
+        logger.info("Tunslip starting FAILED : " + e.getMessage());
+      }
 
-      }.start();
-
-    } catch (Exception e) {
-      throw (RuntimeException) new RuntimeException(
-          "Connection error: " + e.getMessage()).initCause(e);
-    }
-
-    /* Observe serial port for outgoing data */
-    serialPort.addSerialDataObserver(serialDataObserver = new Observer() {
-      public void update(Observable obs, Object obj) {
+      while (server != null) {
         try {
-          if (out == null) {
-            /*logger.debug("out is null");*/
-            return;
-          }
-          out.write(serialPort.getLastSerialData());
+          client = server.accept();
+          in = new DataInputStream(client.getInputStream());
+          out = new DataOutputStream(client.getOutputStream());
           out.flush();
-          outBytes++;
+
+          startSocketReadThread(in);
           if (GUI.isVisualized()) {
-            outLabel.setText(outBytes + " bytes");
+            statusLabel.setText("Client connected: " + client.getInetAddress());
           }
         } catch (IOException e) {
+          logger.fatal("Listening thread shut down: " + e.getMessage());
+          server = null;
           cleanupClient();
+          break;
         }
       }
-    });
-  }
+    }
 
-  private void startSocketReadThread(final DataInputStream in) {
-    /* Forward data: virtual port -> mote */
-    Thread incomingDataThread = new Thread(new Runnable() {
-      public void run() {
-        int numRead = 0;
-        byte[] data = new byte[1024];
-        logger.info("Forwarder: socket -> serial port");
-        while (true) {
+  }.start();
+
+} catch (Exception e) {
+  throw (RuntimeException) new RuntimeException(
+    "Connection error: " + e.getMessage()).initCause(e);
+}
+
+/* Observe serial port for outgoing data */
+serialPort.addSerialDataObserver(serialDataObserver = new Observer() {
+  public void update(Observable obs, Object obj) {
+    try {
+      if (out == null) {
+        /*logger.debug("out is null");*/
+        return;
+      }
+      out.write(serialPort.getLastSerialData());
+      out.flush();
+      outBytes++;
+      if (GUI.isVisualized()) {
+        outLabel.setText(outBytes + " bytes");
+      }
+    } catch (IOException e) {
+      cleanupClient();
+    }
+  }
+});
+}
+
+private void startSocketReadThread(final DataInputStream in) {
+  /* Forward data: virtual port -> mote */
+  Thread incomingDataThread = new Thread(new Runnable() {
+    public void run() {
+      int numRead = 0;
+      byte[] data = new byte[1024];
+      logger.info("Forwarder: socket -> serial port");
+      while (true) {
+        numRead = -1;
+        try {
+          numRead = in.read(data);
+        } catch (IOException e) {
           numRead = -1;
-          try {
-            numRead = in.read(data);
-          } catch (IOException e) {
-            numRead = -1;
-          }
-
-          if (numRead >= 0) {
-            for (int i=0; i < numRead; i++) {
-              serialPort.writeByte(data[i]);
-            }
-            inBytes += numRead;
-            if (GUI.isVisualized()) {
-              inLabel.setText(inBytes + " bytes");
-            }
-          } else {
-            cleanupClient();
-            break;
-          }
         }
+
+        if (numRead >= 0) {
+          for (int i=0; i < numRead; i++) {
+            serialPort.writeByte(data[i]);
+          }
+          inBytes += numRead;
+          if (GUI.isVisualized()) {
+            inLabel.setText(inBytes + " bytes");
+          }
+        } else {
+          cleanupClient();
+          break;
+        }
+      }
+    }
+  });
+  incomingDataThread.start();
+}
+
+private JLabel configureLabel(JComponent pane, String desc, String value) {
+  JPanel smallPane = new JPanel(new BorderLayout());
+  JLabel label = new JLabel(desc);
+  label.setPreferredSize(new Dimension(LABEL_WIDTH,LABEL_HEIGHT));
+  smallPane.add(BorderLayout.WEST, label);
+  label = new JLabel(value);
+  label.setPreferredSize(new Dimension(LABEL_WIDTH,LABEL_HEIGHT));
+  smallPane.add(BorderLayout.CENTER, label);
+  pane.add(smallPane);
+  return label;
+}
+
+public boolean setConfigXML(Collection<Element> configXML, boolean visAvailable) {
+  return true;
+}
+
+public Collection<Element> getConfigXML() {
+  return null;
+}
+
+private void cleanupClient() {
+  try {
+    if (client != null) {
+      client.close();
+      client = null;
+    }
+  } catch (IOException e1) {
+  }
+  try {
+    if (in != null) {
+      in.close();
+      in = null;
+    }
+  } catch (IOException e) {
+  }
+  try {
+    if (out != null) {
+      out.close();
+      out = null;
+    }
+  } catch (IOException e) {
+  }
+
+  if (GUI.isVisualized()) {
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        statusLabel.setText("Listening on port: " + LISTEN_PORT);
       }
     });
-    incomingDataThread.start();
   }
+}
 
-  private JLabel configureLabel(JComponent pane, String desc, String value) {
-    JPanel smallPane = new JPanel(new BorderLayout());
-    JLabel label = new JLabel(desc);
-    label.setPreferredSize(new Dimension(LABEL_WIDTH,LABEL_HEIGHT));
-    smallPane.add(BorderLayout.WEST, label);
-    label = new JLabel(value);
-    label.setPreferredSize(new Dimension(LABEL_WIDTH,LABEL_HEIGHT));
-    smallPane.add(BorderLayout.CENTER, label);
-    pane.add(smallPane);
-    return label;
+public void closePlugin() {
+  cleanupClient();
+  serialPort.deleteSerialDataObserver(serialDataObserver);
+  try {
+    server.close();
+  } catch (IOException e) {
   }
+}
 
-  public boolean setConfigXML(Collection<Element> configXML, boolean visAvailable) {
-    return true;
-  }
+public Mote getMote() {
+  return mote;
+}
 
-  public Collection<Element> getConfigXML() {
-    return null;
-  }
-
-  private void cleanupClient() {
-    try {
-      if (client != null) {
-        client.close();
-        client = null;
-      }
-    } catch (IOException e1) {
-    }
-    try {
-      if (in != null) {
-        in.close();
-        in = null;
-      }
-    } catch (IOException e) {
-    }
-    try {
-      if (out != null) {
-        out.close();
-        out = null;
-      }
-    } catch (IOException e) {
-    }
-
-    if (GUI.isVisualized()) {
-      SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
-          statusLabel.setText("Listening on port: " + LISTEN_PORT);
-        }
-      });
-    }
-  }
-
-  public void closePlugin() {
-    cleanupClient();
-    serialPort.deleteSerialDataObserver(serialDataObserver);
-    try {
-      server.close();
-    } catch (IOException e) {
-    }
-  }
-
-  public Mote getMote() {
-    return mote;
-  }
-  
-  private void setSerialPort() {
-  	serialPort = (SerialPort) this.mote.getInterfaces().get((String)serialPortChoice.getSelectedItem());
-  	if (serialPort == null) {
-  		throw new RuntimeException("Unknown serial port, try to re-create simulation.");
-  	}
-  }
+private void setSerialPort() {
+ serialPort = (SerialPort) this.mote.getInterfaces().get((String)serialPortChoice.getSelectedItem());
+ if (serialPort == null) {
+  throw new RuntimeException("Unknown serial port, try to re-create simulation.");
+}
+}
 }
 
