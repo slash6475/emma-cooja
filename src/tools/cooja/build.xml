@@ -72,8 +72,8 @@ The COOJA Simulator
   <target name="compile" depends="init">
     <mkdir dir="${build}"/>
     <mkdir dir="${build}/tools"/>
-    <copy file="${tools}/tunslip6" todir="${build}/tools/" />
-    <chmod file="${build}/tools/tunslip6" perm="755"/>
+    <copy file="../tunslip6" todir="./tools/" />
+    <chmod file="./tools/tunslip6" perm="755"/>
 
     <javac srcdir="${java}" destdir="${build}" debug="on"
            includeantruntime="false">
@@ -103,6 +103,7 @@ The COOJA Simulator
     <ant antfile="build.xml" dir="apps/collect-view" target="clean" inheritAll="false"/>
 	  <ant antfile="build.xml" dir="apps/powertracker" target="clean" inheritAll="false"/>
     <ant antfile="build.xml" dir="apps/emma-view" target="clean" inheritAll="false"/>
+    <delete file="./tools/tunslip6"/>
   </target>
 
   <target name="run" depends="init, compile, jar, copy configs">
