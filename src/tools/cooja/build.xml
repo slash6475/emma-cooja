@@ -73,7 +73,7 @@
     <mkdir dir="${build}"/>
     <mkdir dir="${build}/tools"/>
     <copy file="../tunslip6" todir="${build}/tools/" />
-    <chmod file="${build}/tunslip6" perm="755"/>
+    <chmod file="${build}/tools/tunslip6" perm="755"/>
 
     <javac srcdir="${java}" destdir="${build}" debug="on"
      includeantruntime="false">
