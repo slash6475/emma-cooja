@@ -37,8 +37,10 @@ echo -e ""
 # Copy Simulation file
 echo -e "Copying simulation files"
 echo -e  "======================="
-mkdir $DEST/../simulations
-cp -r $THIS/simulations/* $DEST/../simulations/
+pwd $DEST/../simulations
+
+mkdir ../../simulations
+cp -r $THIS/simulations/* ../../simulations/
 echo -e ""
 
 echo "Done."
