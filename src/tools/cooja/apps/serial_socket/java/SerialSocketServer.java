@@ -141,12 +141,23 @@ public class SerialSocketServer extends VisPlugin implements MotePlugin {
       
       startButton.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent e){
-					// Start button action
-         ((JButton)e.getSource()).setEnabled(false);
-         serialPortChoice.setEnabled(false);
-         setSerialPort();
-         logger.info("Chosen serial port: " + (String)serialPortChoice.getSelectedItem());
-         startSerialSocket();
+
+          if(((JButton)e.getSource()).getText().equals("Start")){
+            //((JButton)e.getSource()).setEnabled(false);
+            ((JButton)e.getSource()).setText("Stop");
+            serialPortChoice.setEnabled(false);
+            // Start button action
+            setSerialPort();
+            logger.info("Chosen serial port: " + (String)serialPortChoice.getSelectedItem());
+            startSerialSocket();
+          }
+          else {
+            closePlugin();
+            try{Runtime.getRuntime().exec("gksudo -- pkill tunslip6"); }
+            catch(Exception ex){logger.fatal(ex.getMessage());}
+            ((JButton)e.getSource()).setText("Start");
+            serialPortChoice.setEnabled(true);            
+          }
        }
      });
 
@@ -177,7 +188,7 @@ public class SerialSocketServer extends VisPlugin implements MotePlugin {
         public void run() {
          /*Tunslip starting */
          try{
-          final Process proc = Runtime.getRuntime().exec("gksudo -- ./tools/tunslip6 -a 127.0.0.1 -d69 aaaa::1/64"); 
+          final Process proc = Runtime.getRuntime().exec("gksudo -- ./tools/tunslip6 -a 127.0.0.1 -d30 aaaa::1/64"); 
           logger.info("Tunslip starting OK : ");
           new Thread() {
            public void run() {
