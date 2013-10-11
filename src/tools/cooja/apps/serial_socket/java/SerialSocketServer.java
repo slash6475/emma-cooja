@@ -177,7 +177,7 @@ public class SerialSocketServer extends VisPlugin implements MotePlugin {
         public void run() {
          /*Tunslip starting */
          try{
-          final Process proc = Runtime.getRuntime().exec("gksudo -- ./tools/tunslip6 -a 127.0.0.1 aaaa::1/64"); 
+          final Process proc = Runtime.getRuntime().exec("gksudo -- ./tools/tunslip6 -a 127.0.0.1 -d69 aaaa::1/64"); 
           logger.info("Tunslip starting OK : ");
           new Thread() {
            public void run() {
