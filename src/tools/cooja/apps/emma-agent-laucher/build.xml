@@ -5,20 +5,22 @@
   <property name="cooja_jar" value="../../dist/cooja.jar"/>
   <property name="lib" value="lib/"/>
   <property name="dep" value="dep/"/>
+  <property name="emma-agent-loader" value="../../../../../emma-agent-loader/"/>
 
   <path id="lib-classpath">
      <fileset dir="${dep}" includes="*.jar"/>
   </path>
-  <manifestclasspath property="jar.classpath" jarfile="${lib}/emma-agent-laucher.jar">
-      <classpath refid="lib-classpath" />
-  </manifestclasspath>
 
   <target name="init">
+    <ant antfile="build.xml" dir="${emma-agent-loader}" target="clean" inheritAll="false"/>
+    <ant antfile="build.xml" dir="${emma-agent-loader}" target="jar" inheritAll="false"/>
+    <copy file="${emma-agent-loader}/dist/emma-agent-loader.jar" todir="${dep}"/>
     <tstamp/>
   </target>
 
   <target name="compile" depends="init">
     <mkdir dir="build"/>
+    <mkdir dir="lib"/>
     <javac srcdir="java" destdir="build" debug="on" includeantruntime="false" classpathref="lib-classpath">
       <classpath>
         <pathelement path="."/>
@@ -27,16 +29,17 @@
     </javac>
   </target>
 
-  <target name="clean" depends="init">
-	<delete dir="build"/>
+  <target name="clean">
+  <delete dir="build"/>
+  <delete dir="lib"/>
+  <delete file="${dep}/emma-agent-loader.jar"/>
   </target>
 
   <target name="jar" depends="clean, init, compile">
-    <mkdir dir="${lib}"/>
     <jar destfile="${lib}/emma-agent-laucher.jar" basedir="build">
       <zipgroupfileset dir="${dep}" includes="**/*.jar" />
       <manifest>
-	<attribute name="Class-Path" value="${jar.classpath}"/>
+	       <attribute name="Class-Path" value="${jar.classpath}"/>
       </manifest>
     </jar>
   </target>

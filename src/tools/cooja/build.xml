@@ -103,6 +103,7 @@
   <ant antfile="build.xml" dir="apps/collect-view" target="clean" inheritAll="false"/>
   <ant antfile="build.xml" dir="apps/powertracker" target="clean" inheritAll="false"/>
   <ant antfile="build.xml" dir="apps/emma-view" target="clean" inheritAll="false"/>
+  <ant antfile="build.xml" dir="apps/emma-agent-laucher" target="clean" inheritAll="false"/>
   <delete file="./tools/tunslip6"/>
 </target>
 
@@ -199,6 +200,7 @@
   <ant antfile="build.xml" dir="apps/collect-view" target="jar" inheritAll="false"/>
   <ant antfile="build.xml" dir="apps/powertracker" target="jar" inheritAll="false"/>
   <ant antfile="build.xml" dir="apps/emma-view" target="jar" inheritAll="false"/>
+  <ant antfile="build.xml" dir="apps/emma-agent-laucher" target="jar" inheritAll="false"/>
 </target>
 
 <target name="run_nogui" depends="init, compile, jar, copy configs">
