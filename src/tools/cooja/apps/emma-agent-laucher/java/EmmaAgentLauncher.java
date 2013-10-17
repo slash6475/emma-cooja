@@ -177,6 +177,7 @@ public class EmmaAgentLauncher extends VisPlugin {
     };
     /*Send an agent */
     private Thread T;
+    private Agent eAgent;
     private Action Launch = new AbstractAction("Launch") {
 
         public void actionPerformed(ActionEvent e) {
@@ -186,7 +187,7 @@ public class EmmaAgentLauncher extends VisPlugin {
                 public void run() {
                     String agent = payload.getText();
 
-                    Agent eAgent = new Agent(agent);
+                    eAgent = new Agent(agent);
                     if (eAgent.isValid()) {
                         String req = "coap://[" + ip.getSelectedItem().toString() + "]:" + port.getText().toString() + uri.getText();
                         System.out.println("REQ : " + req);
@@ -216,6 +217,7 @@ public class EmmaAgentLauncher extends VisPlugin {
         public void actionPerformed(ActionEvent e) {
             if (T != null) {
                 if (T.isAlive()) {
+                    eAgent.stop();
                     T.stop();
                 }
             }
