@@ -121,14 +121,6 @@ public class EmmaAgentLauncher extends VisPlugin {
                 )
         );
  
-        /*Box uri_box = Box.createHorizontalBox();
-        uri_box.add(Box.createHorizontalGlue());
-        uri_box.add(label_coap);
-        uri_box.add(ip);
-        uri_box.add(label_coap_end);
-        uri_box.add(port);
-        uri_box.add(uri);*/
-
         refresh_btn = new JButton(Refresh);
         launch_btn = new JButton(Launch);
         load_btn = new JButton(Load);
@@ -160,6 +152,8 @@ public class EmmaAgentLauncher extends VisPlugin {
             }
         });
 
+        ip.addItem("ALL-Unicast");
+        ip.addItem("ff02::2");
         for (Mote m : simulation.getMotes()) {
             ip.addItem(m.getInterfaces().getIPAddress().getIPString());
         }
@@ -170,21 +164,51 @@ public class EmmaAgentLauncher extends VisPlugin {
 
         public void actionPerformed(ActionEvent e) {
             ip.removeAllItems();
+            ip.addItem("ALL-Unicast");
+            ip.addItem("ff02::2");
             for (Mote m : simulation.getMotes()) {
                 ip.addItem(m.getInterfaces().getIPAddress().getIPString());
             }
         }
     };
+
+    /*=================================================================================*/
     /*Send an agent */
     private Thread T;
     private Agent eAgent;
+    private int current_id = -1;
+    private String response_text = "";
+    private long time_start, time_end;
     private Action Launch = new AbstractAction("Launch") {
 
         public void actionPerformed(ActionEvent e) {
             launch_btn.setAction(Stop);
-            T = new Thread(new Runnable() {
 
+            if(ip.getSelectedItem().toString().equals("ALL-Unicast")){
+                current_id = 2;
+                response_text = "";
+            }
+            time_start = simulation.getSimulationTime();
+            agent_launch();
+
+
+        }
+    };
+
+    void agent_launch(){
+            T = new Thread(new Runnable() {
                 public void run() {
+                    if(current_id != -1){
+                    if(++current_id >= ip.getItemCount()){
+                        current_id = -1;
+                        time_end = simulation.getSimulationTime();
+                        response_text += "Deployment time : " + (time_end - time_start)/1000 + " ms\n";
+                        JOptionPane.showMessageDialog(null, response_text);
+                        return;
+                    }
+                    ip.setSelectedIndex(current_id);
+                }
+
                     String agent = payload.getText();
 
                     eAgent = new Agent(agent);
@@ -199,18 +223,29 @@ public class EmmaAgentLauncher extends VisPlugin {
                         if(response != null)
                            response.prettyPrint(out);
                         
-                        JOptionPane.showMessageDialog(null, rsp_data.toString());
+                        if(current_id == -1){
+                            time_end = simulation.getSimulationTime();
+                            JOptionPane.showMessageDialog(null, rsp_data.toString() + "Deployment time : " + (time_end - time_start)/1000 + " ms\n");
+                        }
+                        else response_text += rsp_data.toString() + "\n";
+
+                        if(current_id != -1){
+                            agent_launch();
+                        }
                         
                     } else {
                         JOptionPane.showMessageDialog(null, "Agent bad written");
                     }
+
                     launch_btn.setAction(Launch);
                 }
             });
             T.start();
 
-        }
-    };
+    }
+
+    /*=================================================================================*/
+
     /* Stop sending of an agent */
     private Action Stop = new AbstractAction("Stop") {
 
@@ -291,10 +326,6 @@ public class EmmaAgentLauncher extends VisPlugin {
                 } catch (IOException ex) {
                     JOptionPane.showMessageDialog(null, "Opening agent error : " + ex.getMessage());
                 }
-
-
-
-
             }
         }
     };
