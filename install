@@ -26,6 +26,12 @@ cp -R $THIS/src/* $DEST/
 cp $THIS/start.sh $DEST
 echo -e ""
 
+# Copy simulations
+echo -e "Copying simulation files"
+echo -e  "==================="
+cp -R $THIS/simulations $DEST/
+echo -e ""
+
 # Compiling tunslip
 echo -e "Tunslip6 compilation"
 echo -e  "==================="
